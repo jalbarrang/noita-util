@@ -4,3 +4,8 @@
 target/
 Sandbox.kt
 irc.log
+build/
+gradle/
+gradlew
+gradlew.bat
+.gradle/

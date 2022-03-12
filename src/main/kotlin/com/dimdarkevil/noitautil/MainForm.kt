@@ -64,9 +64,11 @@ class MainForm(private val config: AppConfig, private val frame: JFrame, private
 	)
 
 	private val qrefTabPane = JTabbedPane()
-	private val qrefInfoPanel = JPanel()
+	private val qrefInfoPanel = JPanel().apply {
+		this.layout = BoxLayout(this, BoxLayout.Y_AXIS)
+	}
 	private val qrefInfoScrollPane = JScrollPane(qrefInfoPanel)
-	private val spellInfoUi = InfoUi(Spell::class)
+	private val spellInfoUi = SpellInfoPanel(qrefInfoPanel)
 	private val spellPanel = JPanel(BorderLayout())
 	private val spellSearchTextField = JTextField()
 	private val spellTableModel = SpellTableModel()
@@ -131,10 +133,6 @@ class MainForm(private val config: AppConfig, private val frame: JFrame, private
 
 
 		qrefTabPane.addTab("spells", spellPanel)
-		qrefInfoPanel.layout = BoxLayout(qrefInfoPanel, BoxLayout.Y_AXIS)
-		spellInfoUi.comps.forEach {
-			qrefInfoPanel.add(it.panel)
-		}
 		val spellSearchPanel = PaddedPanel()
 		spellSearchPanel.layout = BoxLayout(spellSearchPanel, BoxLayout.X_AXIS)
 		spellSearchPanel.add(JLabel("search:"))

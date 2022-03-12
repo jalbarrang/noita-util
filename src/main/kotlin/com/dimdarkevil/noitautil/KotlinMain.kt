@@ -47,7 +47,7 @@ object KotlinMain {
 		)
 
 		UIManager.put("FileChooser.readOnly", true)
-		val pframe = JFrame(APP_NAME)
+		val pframe = JFrame("${APP_NAME} ${Version.version}")
 		pframe.setSize(480, 180)
 		pframe.setLocationRelativeTo(null)
 		pframe.setLocation((screenSize.width - 480)/2, (screenSize.height - 180) / 2)
@@ -65,7 +65,7 @@ object KotlinMain {
 		pframe.dispose()
 
 		if (!success) {
-			val sframe = JFrame(APP_NAME)
+			val sframe = JFrame("${APP_NAME} ${Version.version}")
 			sframe.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
 			val (ssuccess, newCfg) = SettingsDlg(config, sframe, "$APP_NAME settings").showModal()
 			if (ssuccess && newCfg != null) {
@@ -79,7 +79,7 @@ object KotlinMain {
 			}
 			sframe.dispose()
 		} else {
-			val frame = JFrame(APP_NAME)
+			val frame = JFrame("${APP_NAME} ${Version.version}")
 			val mainForm = MainForm(config, frame, noitaData!!)
 			frame.contentPane = mainForm.mainPanel
 
