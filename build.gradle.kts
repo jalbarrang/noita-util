@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.dimdarkevil"
-version = "1.0.1"
+version = "1.0.2"
 
 val compileKotlin: KotlinCompile by tasks
 val compileJava: JavaCompile by tasks

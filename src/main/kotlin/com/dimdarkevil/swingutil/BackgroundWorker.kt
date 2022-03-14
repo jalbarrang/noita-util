@@ -54,7 +54,10 @@ abstract class BackgroundWorker<T>(
 	private fun reportError(msg: String, fatal: Boolean) {
 		val mm = if (fatal) "ERROR: $msg" else msg
 		publish(mm)
-		if (fatal) success = false
+		if (fatal) {
+			errorMsg = msg
+			success = false
+		}
 	}
 
 }

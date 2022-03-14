@@ -67,7 +67,7 @@ object KotlinMain {
 		if (!success) {
 			val sframe = JFrame("${APP_NAME} ${Version.version}")
 			sframe.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
-			val (ssuccess, newCfg) = SettingsDlg(config, sframe, "$APP_NAME settings").showModal()
+			val (ssuccess, newCfg) = SettingsDlg(config, sframe, "$APP_NAME settings", loadingScreen.failureMessage).showModal()
 			if (ssuccess && newCfg != null) {
 				config.noitaSaveFolder = newCfg.noitaSaveFolder
 				config.noitaExeFile = newCfg.noitaExeFile

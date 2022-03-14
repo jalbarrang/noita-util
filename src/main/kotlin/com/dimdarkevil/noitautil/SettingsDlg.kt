@@ -9,7 +9,7 @@ import javax.swing.*
 import javax.swing.border.EmptyBorder
 import javax.swing.filechooser.FileNameExtensionFilter
 
-class SettingsDlg(private val config: AppConfig, owner: JFrame, title: String) : OkCancelModalDialog<AppConfig>(owner, title) {
+class SettingsDlg(private val config: AppConfig, owner: JFrame, title: String, errorMsg: String = "") : OkCancelModalDialog<AppConfig>(owner, title, errorMsg) {
 	private val saveFolderLabel = JLabel(config.noitaSaveFolder)
 	private val saveFolderBtn = JButton("select")
 	private val exeLocationLabel = JLabel(config.noitaExeFile)

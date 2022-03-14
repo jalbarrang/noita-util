@@ -3,7 +3,7 @@ package com.dimdarkevil.swingutil
 import java.awt.BorderLayout
 import javax.swing.*
 
-abstract class OkCancelModalDialog<T>(owner: JFrame, title: String) :  JDialog(owner, title, true) {
+abstract class OkCancelModalDialog<T>(owner: JFrame, title: String, val errorMsg: String = "") :  JDialog(owner, title, true) {
 	private val okBtn = JButton("OK")
 	private val cancelBtn = JButton("Cancel")
 	private var resOk = false
@@ -32,6 +32,9 @@ abstract class OkCancelModalDialog<T>(owner: JFrame, title: String) :  JDialog(o
 	protected abstract fun getResult(): T
 
 	fun showModal() : Pair<Boolean, T?> {
+		if (errorMsg.isNotEmpty()) {
+			JOptionPane.showMessageDialog(owner, errorMsg, "Error", JOptionPane.ERROR_MESSAGE)
+		}
 		createUiComponents()
 		isVisible = true
 		return Pair(resOk, res)

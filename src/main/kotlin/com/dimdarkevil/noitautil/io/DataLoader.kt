@@ -36,23 +36,23 @@ class DataLoader(
 		if (!File(config.noitaExeFile).exists()) {
 			throw RuntimeException("Noita exe file not found")
 		}
-		publish("loading translations|")
+		showMessage("loading translations")
 		val translations = loadTranslations(config) {
-			publish("loading translations|$it")
+			showMessage("loading translations", it)
 		}
-		publish("loading spells|")
+		showMessage("loading spells")
 		val spells = loadSpells(config, translations) {
-			publish("loading spells|$it")
+			showMessage("loading spells", it)
 		}
-		publish("loading perks|")
+		showMessage("loading perks")
 		val perks = loadPerks(config, translations) {
-			publish("loading perks|$it")
+			showMessage("loading perks", it)
 		}
-		publish("loading bone wands|")
+		showMessage("loading bone wands")
 		val boneWands = loadBoneWands(config, spells) {
-			publish("loading bone wands|$it")
+			showMessage("loading bone wands", it)
 		}
-		publish("done")
+		showMessage("done")
 		return NoitaData(
 			translations = translations,
 			spells = spells,
@@ -60,7 +60,14 @@ class DataLoader(
 			boneWands = boneWands,
 		)
 	}
+
+	private fun showMessage(label: String, msg: String = "") {
+		val s = "${label}|${msg}"
+		//println(s)
+		publish(s)
+	}
 }
+
 
 data class NoitaData(
 	val translations: Map<String, String>,
@@ -72,6 +79,7 @@ data class NoitaData(
 
 fun loadTranslations(config: AppConfig, cb: ((String) -> Unit)? = null) : Map<String,String> {
 	val transFile = getTranslationsFile(config)
+	println("transFile is ${transFile.canonicalPath}")
 	val trans = FileReader(transFile).use { rdr ->
 		CSVFormat.DEFAULT.parse(rdr).records.associate { rec ->
 			val id = rec[0].trim()
@@ -80,6 +88,7 @@ fun loadTranslations(config: AppConfig, cb: ((String) -> Unit)? = null) : Map<St
 			"\$${id}" to desc
 		}
 	}
+	println("done loading translations")
 	return trans
 }
 

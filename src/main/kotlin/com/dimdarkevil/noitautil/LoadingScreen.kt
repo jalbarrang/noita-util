@@ -15,6 +15,7 @@ class LoadingScreen(val frame: JFrame, val config: AppConfig) : ComponentListene
 	val mainPanel = JPanel()
 	var noitaData: NoitaData? = null
 	var succeeded = false
+	var failureMessage: String = ""
 	var done = false
 	private val progressLabel = JLabel("loading...")
 	private val progressBar = JProgressBar(0, 100)
@@ -49,6 +50,7 @@ class LoadingScreen(val frame: JFrame, val config: AppConfig) : ComponentListene
 		succeeded = success
 		noitaData = data
 		if (!success) {
+			failureMessage = msg
 			progressLabel.text = msg
 			progressBar.value = 0
 		}
