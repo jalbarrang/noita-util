@@ -3,6 +3,7 @@ package com.dimdarkevil.noitautil
 import com.dimdarkevil.noitautil.model.AppConfig
 import com.dimdarkevil.swingutil.loadConfig
 import com.dimdarkevil.swingutil.saveConfig
+import org.slf4j.LoggerFactory
 import java.awt.EventQueue
 import java.awt.Toolkit
 import java.awt.event.WindowAdapter
@@ -14,6 +15,7 @@ import javax.swing.UIManager
 import javax.swing.UnsupportedLookAndFeelException
 
 object KotlinMain {
+	private val log = LoggerFactory.getLogger("KotlinMain")
 
 	@JvmStatic
 	fun main(args: Array<String>) {
@@ -80,7 +82,12 @@ object KotlinMain {
 			sframe.dispose()
 		} else {
 			val frame = JFrame("${APP_NAME} ${Version.version}")
-			val mainForm = MainForm(config, frame, noitaData!!)
+			val mainForm = try {
+				MainForm(config, frame, noitaData!!)
+			} catch (e: Exception) {
+				log.error(e.message, e)
+				throw e
+			}
 			frame.contentPane = mainForm.mainPanel
 
 			frame.setSize(config.winWidth, config.winHeight)

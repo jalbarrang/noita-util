@@ -17,6 +17,7 @@ object SalakieliUtil {
 
 	val files = mapOf(
 		"stats" to SalakieliFile("stats/_stats.salakieli", "536563726574734f66546865416c6c53", "54687265654579657341726557617463"),
+		"streaks" to SalakieliFile("stats/_streaks.salakieli", "536563726574734f66546865416c6c53", "54687265654579657341726557617463"),
 		"magic_numbers" to SalakieliFile("magic_numbers.salakieli", "4b6e6f776c6564676549735468654869", "57686f576f756c646e74476976654576"),
 		"session_numbers" to SalakieliFile("session_numbers.salakieli", "4b6e6f776c6564676549735468654869", "57686f576f756c646e74476976654576"),
 		"internal_alchemy_list" to SalakieliFile("?", "31343439363631363932313933343032", "38313632343338393133393638333733"),

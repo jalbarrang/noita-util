@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.dimdarkevil"
-version = "1.0.2"
+version = "1.0.3"
 
 val compileKotlin: KotlinCompile by tasks
 val compileJava: JavaCompile by tasks
@@ -18,10 +18,10 @@ repositories {
 }
 
 dependencies {
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.1")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.1")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.2")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.2")
     implementation("org.apache.commons:commons-csv:1.9.0")
-    implementation("com.github.oshi:oshi-core:6.1.4")
+    implementation("com.github.oshi:oshi-core:6.1.5")
     implementation("org.jsoup:jsoup:1.14.3")
     implementation("org.slf4j:slf4j-simple:1.7.36")
     testImplementation(kotlin("test"))

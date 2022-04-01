@@ -226,13 +226,13 @@ fun loadBoneWand(f: File, spells: Map<String, Spell>) : BoneWand {
 	val gunactionConfig = abilityComp.select("gunaction_config").firstOrNull() ?: throw RuntimeException("gunaction_config not found")
 	val wand = Wand(
 		shuffle = (gunConfig.attr("shuffle_deck_when_empty") == "1"),
-		spellsCast = gunConfig.attr("actions_per_round").toInt(),
+		spellsCast = gunConfig.attr("actions_per_round").toIntViaFloat(),
 		castDelay = BigDecimal(gunactionConfig.attr("fire_rate_wait")).setScale(4).divide(BigDecimal("60.0000"), mc).setScale(2, RoundingMode.HALF_UP),
 		rechargeTime = BigDecimal(gunConfig.attr("reload_time")).setScale(4).divide(BigDecimal("60.0000"), mc).setScale(2, RoundingMode.HALF_UP),
-		manaMax = abilityComp.attr("mana_max").toFloat().toInt(),
-		manaChargeSpeed = abilityComp.attr("mana_charge_speed").toInt(),
-		capacity = gunConfig.attr("deck_capacity").toInt(),
-		spread = BigDecimal(gunactionConfig.attr("spread_degrees")).setScale(2),
+		manaMax = abilityComp.attr("mana_max").toIntViaFloat(),
+		manaChargeSpeed = abilityComp.attr("mana_charge_speed").toIntViaFloat(),
+		capacity = gunConfig.attr("deck_capacity").toIntViaFloat(),
+		spread = BigDecimal(gunactionConfig.attr("spread_degrees")).setScale(2, RoundingMode.HALF_UP),
 		alwaysCasts = loadSpellsForWand(doc.root(), spells, "1"),
 		spells = loadSpellsForWand(doc.root(), spells, "0"),
 		spriteFile = abilityComp.attr("sprite_file")
@@ -243,6 +243,8 @@ fun loadBoneWand(f: File, spells: Map<String, Spell>) : BoneWand {
 		wand = wand
 	)
 }
+
+fun String.toIntViaFloat() = this.split(".").first().toInt()
 
 private fun loadSpellsForWand(root: Element, spells: Map<String, Spell>, alwaysCastVal: String) : List<Spell> {
 	return root.select("Entity").filter { it.attr("tags").contains("card_action") }.filter { el ->
