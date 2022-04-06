@@ -19,3 +19,17 @@ When you first run `noita-util`, it will try to find:
 It will also create a backup folder in `\\User\{yourusername}\Desktop\noita_saves`. You can change this in the settings.
 
 If any of these files are not found, you'll get a settings dialog. When the folders have been set up correctly, just run `noita-util` again.
+
+### screenshots
+
+![backup manager screen](screenshots/main_screen.png "backup manager screen")
+
+![salakieli browser](screenshots/salakieli_screen.png "salakieli browser")
+
+![quick-ref - wands](screenshots/quick_ref_screen.png "quick-ref - wands")
+
+![bone wand browser](screenshots/bone_wand_screen.png "bone wand browser")
+
+![settings](screenshots/settings_screen.png "settings screen")
+
+![run seed](screenshots/run_seed_screen.png "run seed screen")
