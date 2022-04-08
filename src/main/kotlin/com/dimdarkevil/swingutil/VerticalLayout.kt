@@ -22,7 +22,7 @@ class VerticalLayout(private val spacing: Int) : LayoutManager2 {
 	}
 
 	override fun preferredLayoutSize(container: Container): Dimension {
-		println("preferredLayoutSize")
+		//println("preferredLayoutSize")
 		//val prefWidth = comps.maxBy { it.preferredSize.width }?.preferredSize.width ?: 0
 		//val prefWidth = container.preferredSize.width
 
@@ -36,7 +36,7 @@ class VerticalLayout(private val spacing: Int) : LayoutManager2 {
 	}
 
 	override fun minimumLayoutSize(container: Container): Dimension {
-		println("minimumLayoutSize")
+		//println("minimumLayoutSize")
 		//val minWidth = comps.maxBy { it.minimumSize.width }?.minimumSize.width ?: 0
 		//val minWidth = container.minimumSize.width
 		val minWidth = 50
@@ -46,35 +46,35 @@ class VerticalLayout(private val spacing: Int) : LayoutManager2 {
 	}
 
 	override fun addLayoutComponent(name: String, comp: Component) {
-		println("adding component $comp (${comp.javaClass}) with name $name")
+		//println("adding component $comp (${comp.javaClass}) with name $name")
 		comps.add(comp)
 	}
 
 	override fun addLayoutComponent(comp: Component, constraints: Any?) {
-		println("addLayoutComponent ${comp} ${comp.javaClass}")
+		//println("addLayoutComponent ${comp} ${comp.javaClass}")
 	}
 
 	override fun removeLayoutComponent(comp: Component) {
-		println("removing component $comp (${comp.javaClass})")
+		//println("removing component $comp (${comp.javaClass})")
 		comps.remove(comp)
 	}
 
 	override fun invalidateLayout(container: Container) {
-		println("invalidateLayout")
+		//println("invalidateLayout")
 	}
 
 	override fun getLayoutAlignmentY(container: Container): Float {
-		println("getLayoutAlignmentY")
+		//println("getLayoutAlignmentY")
 		return 0f
 	}
 
 	override fun getLayoutAlignmentX(container: Container): Float {
-		println("getLayoutAlignmentX")
+		//println("getLayoutAlignmentX")
 		return 0f
 	}
 
 	override fun maximumLayoutSize(container: Container): Dimension {
-		println("maximumLayoutSize")
+		//println("maximumLayoutSize")
 		val psize = preferredLayoutSize(container)
 		return Dimension(0, psize.height)
 	}

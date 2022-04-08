@@ -63,7 +63,6 @@ class DataLoader(
 
 	private fun showMessage(label: String, msg: String = "") {
 		val s = "${label}|${msg}"
-		//println(s)
 		publish(s)
 	}
 }
@@ -78,18 +77,39 @@ data class NoitaData(
 
 
 fun loadTranslations(config: AppConfig, cb: ((String) -> Unit)? = null) : Map<String,String> {
+/*
 	val transFile = getTranslationsFile(config)
-	println("transFile is ${transFile.canonicalPath}")
-	val trans = FileReader(transFile).use { rdr ->
-		CSVFormat.DEFAULT.parse(rdr).records.associate { rec ->
-			val id = rec[0].trim()
-			val desc = rec[1].trim()
-			cb?.invoke(id)
-			"\$${id}" to desc
+	println("transFile is ${transFile.canonicalPath}, exists = ${transFile.exists()}")
+	try {
+		FileReader(transFile).use { rdr ->
+			CSVFormat.DEFAULT.parse(rdr).forEach {
+				println("$it")
+			}
 		}
+	} catch (e: Exception) {
+		println("Exception loading translations: ${e.message}")
+		throw e
 	}
 	println("done loading translations")
+*/
+	val transFile = getTranslationsFile(config)
+	//println("transFile is ${transFile.canonicalPath}, exists = ${transFile.exists()}")
+	val trans = try {
+		FileReader(transFile).use { rdr ->
+			CSVFormat.DEFAULT.parse(rdr).records.associate { rec ->
+				val id = rec[0].trim()
+				val desc = rec[1].trim()
+				cb?.invoke(id)
+				"\$${id}" to desc
+			}
+		}
+	} catch (e: Exception) {
+		println("Exception loading translations: ${e.message}")
+		throw e
+	}
+	//println("done loading translations")
 	return trans
+	//return mapOf()
 }
 
 fun loadSpells(config: AppConfig, translations: Map<String,String>, cb: ((String) -> Unit)? = null) : List<Spell> {

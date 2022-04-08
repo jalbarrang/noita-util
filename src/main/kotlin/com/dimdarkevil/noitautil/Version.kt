@@ -17,7 +17,7 @@ open class Versioner {
 	val properties:Properties by lazy {
 		val cls = javaClass
 		Properties().apply {
-			cls.getResourceAsStream("version.properties")?.use { stream ->
+			ResourceLoader.load("version.properties")?.use { stream ->
 				load(stream)
 			}
 		}

@@ -47,6 +47,7 @@ class LoadingScreen(val frame: JFrame, val config: AppConfig) : ComponentListene
 	}
 
 	fun doneCallback(success: Boolean, msg: String, data: NoitaData?) {
+		println("loading done: success = $success")
 		succeeded = success
 		noitaData = data
 		if (!success) {

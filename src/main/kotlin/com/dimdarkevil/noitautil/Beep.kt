@@ -4,7 +4,7 @@ import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
 
 class Beep {
-	val clipData = javaClass.getResourceAsStream("/beep.wav")?.use { sin ->
+	val clipData = ResourceLoader.load("/beep.wav")?.use { sin ->
 		sin.readAllBytes()
 	}!!
 	val clip = AudioSystem.getClip()

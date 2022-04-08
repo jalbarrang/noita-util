@@ -1,5 +1,6 @@
 package com.dimdarkevil.swingutil
 
+import com.dimdarkevil.noitautil.ResourceLoader
 import javax.imageio.ImageIO
 import javax.swing.ImageIcon
 
@@ -23,7 +24,7 @@ object IconLoader {
 */
 
 	fun img(icon: Ico, size: Int) =
-		ImageIO.read(javaClass.getResourceAsStream("/icons/${icon.fname}"))
+		ImageIO.read(ResourceLoader.load("/icons/${icon.fname}"))
 
 	fun imgIcon(icon: Ico, size: Int) =
 		ImageIcon(img(icon, size))

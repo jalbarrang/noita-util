@@ -1,17 +1,13 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.6.20-M1"
+    kotlin("jvm") version "1.6.20"
     application
-    id("org.beryx.jlink") version "2.25.0"
+    id("edu.sc.seis.launch4j") version "2.5.3"
 }
 
 group = "com.dimdarkevil"
-version = "1.0.3"
-
-val compileKotlin: KotlinCompile by tasks
-val compileJava: JavaCompile by tasks
-compileJava.destinationDir = compileKotlin.destinationDir
+version = "1.1.0"
 
 repositories {
     mavenCentral()
@@ -35,12 +31,6 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "17"
 }
 
-/*
-tasks.withType<Jar> {
-    archiveFileName.set("${project.name}.jar")
-}
-*/
-
 tasks.withType<ProcessResources> {
     eachFile {
         if (name == "version.properties") {
@@ -52,33 +42,12 @@ tasks.withType<ProcessResources> {
 }
 
 application {
-    mainClassName = "com.dimdarkevil.noitautil.KotlinMain"
-    mainModule.set("noitautil")
+    mainClass.set("com.dimdarkevil.noitautil.KotlinMain")
 }
 
-/*
-distributions {
-    main {
-        distributionBaseName.set(project.name)
-        contents {
-            from("README.md")
-        }
-    }
-}
-*/
-
-jlink {
-    val currentOs = org.gradle.internal.os.OperatingSystem.current()
-    forceMerge("kotlin")
-    launcher {
-        name = "noita-util"
-    }
-    imageZip.set(project.file("${project.buildDir}/image-zip/noita-util-image-${project.version}.zip"))
-    jpackage {
-        if (currentOs.isWindows) {
-            installerOptions = installerOptions.plus(listOf(
-                "--win-per-user-install", "--win-dir-chooser", "--win-menu", "--win-shortcut"
-            ))
-        }
-    }
+tasks.withType<edu.sc.seis.launch4j.tasks.DefaultLaunch4jTask> {
+    outfile = "${productName}.exe"
+    mainClassName = application.mainClass.get()
+    icon = "${projectDir}/src/main/resources/noita-util.ico"
+    productName = productName
 }

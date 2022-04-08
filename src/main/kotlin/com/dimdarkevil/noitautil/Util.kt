@@ -1,6 +1,8 @@
 package com.dimdarkevil.noitautil
 
 import java.io.File
+import java.io.FileInputStream
+import java.io.InputStream
 
 val HOME = File(System.getProperty("user.home"))
 const val APP_NAME = "noita-util"
@@ -47,4 +49,16 @@ fun List<String>.filterLuaComments() : List<String> {
 		}
 	}
 	return newLines.filter { !it.trim().startsWith("--") }
+}
+
+object ResourceLoader {
+	fun load(name: String) : InputStream? {
+		return try {
+			javaClass.getResourceAsStream(name)
+		} catch (e: Exception) {
+			val resName = if (name.startsWith("/")) name.substring(1) else name
+			val inputFile = File(File(System.getProperty("user.dir")), "resources/$resName")
+			FileInputStream(inputFile)
+		}
+	}
 }

@@ -8,11 +8,11 @@ object EmUnit {
 	fun getEmSize() : Int {
 		val tf = JTextField()
 		val font = tf.font
-		println("font is ${font.family} ${font.name}")
+		//println("font is ${font.family} ${font.name}")
 		val s = "\u2014"
 		val fm = tf.getFontMetrics(font)
 		val mwidth = fm.stringWidth(s)
-		println("em dash is $s - width is $mwidth")
+		//println("em dash is $s - width is $mwidth")
 		return mwidth
 	}
 

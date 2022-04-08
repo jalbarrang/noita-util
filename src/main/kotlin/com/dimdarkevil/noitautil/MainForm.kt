@@ -178,7 +178,7 @@ class MainForm(private val config: AppConfig, private val frame: JFrame, private
 		if (fileTable.selectedRow < 0) return
 		val fileName = fileTableModel.items[fileTable.selectedRow].name
 		//val fileName = fileList.selectedValue ?: return
-		println("restoring $fileName")
+		//println("restoring $fileName")
 		try {
 			val confirm = JOptionPane.showConfirmDialog(frame, "Backup first?", "Confirmation", JOptionPane.YES_NO_CANCEL_OPTION)
 			when (confirm) {
@@ -230,7 +230,7 @@ class MainForm(private val config: AppConfig, private val frame: JFrame, private
 			.replace("-", "_")
 			.replace(":", "_")
 		val res = JOptionPane.showInputDialog(frame, "name your backup", defName) ?: return
-		println("option pane result $res")
+		//println("option pane result $res")
 		try {
 			val inFile = File(config.noitaSaveFolder, "save00")
 			if (!inFile.exists()) throw RuntimeException("can't find save folder at ${inFile.path}")

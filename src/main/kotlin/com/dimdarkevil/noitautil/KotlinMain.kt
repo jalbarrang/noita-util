@@ -41,11 +41,11 @@ object KotlinMain {
 		if (config.winY < 0) config.winY = (screenSize.height - config.winHeight) / 2
 
 		val icons = listOf(
-			ImageIO.read(javaClass.getResourceAsStream("/noita-save-16.png")),
-			ImageIO.read(javaClass.getResourceAsStream("/noita-save-32.png")),
-			ImageIO.read(javaClass.getResourceAsStream("/noita-save-64.png")),
-			ImageIO.read(javaClass.getResourceAsStream("/noita-save-128.png")),
-			ImageIO.read(javaClass.getResourceAsStream("/noita-save-256.png")),
+			ImageIO.read(ResourceLoader.load("/noita-util-16.png")),
+			ImageIO.read(ResourceLoader.load("/noita-util-32.png")),
+			ImageIO.read(ResourceLoader.load("/noita-util-64.png")),
+			ImageIO.read(ResourceLoader.load("/noita-util-128.png")),
+			ImageIO.read(ResourceLoader.load("/noita-util-256.png")),
 		)
 
 		UIManager.put("FileChooser.readOnly", true)
@@ -60,10 +60,12 @@ object KotlinMain {
 			pframe.isVisible = true
 		}
 		while (!loadingScreen.done) {
+			//println("sleeping...")
 			Thread.sleep(500)
 		}
 		val success = loadingScreen.succeeded
 		val noitaData = loadingScreen.noitaData
+		//println("noitaData is $noitaData")
 		pframe.dispose()
 
 		if (!success) {
@@ -95,7 +97,7 @@ object KotlinMain {
 			frame.setLocation(config.winX, config.winY)
 			frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
 			frame.iconImages = icons
-			//frame.iconImage = ImageIcon(javaClass.getResource("/pipewrench.png")).image
+			//frame.iconImage = ImageIcon(ResourceLoader.load("/pipewrench.png")).image
 			frame.addWindowListener(object: WindowAdapter() {
 				override fun windowClosing(e: WindowEvent) {
 					mainForm.updateConfig()
