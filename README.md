@@ -20,6 +20,19 @@ It will also create a backup folder in `\\User\{yourusername}\Desktop\noita_save
 
 If any of these files are not found, you'll get a settings dialog. When the folders have been set up correctly, just run `noita-util` again.
 
+### common issues
+
+If you run `noita-util` on a high DPI display with screen scaling, the app may appear blurry. I'm considering a fix for this in the installer, but if you experience this, use File Explorer to navigate to where you installed `noita-util`, and do the following steps:
+
+![noita-util.exe Properties](screenshots/high_dpi_settings.png)
+
+* Right-click `noita-util.exe` and select `Properties`.
+* Select the `Compatibility` tab
+* Click the `Change high DPI settings` button (a new dialog will appear)
+* Check the `Override high DPI scaling behavior` checkbox
+* From the `Scaling performed by` drop-down, seelect `Application`.
+* Click `OK` on both open dialogs.
+
 ### screenshots
 
 ![backup manager screen](screenshots/main_screen.png "backup manager screen")
