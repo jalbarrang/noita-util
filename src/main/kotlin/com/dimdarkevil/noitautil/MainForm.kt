@@ -143,10 +143,12 @@ class MainForm(private val config: AppConfig, private val frame: JFrame, private
 		spellTable.selectionModel.selectionMode = ListSelectionModel.SINGLE_SELECTION
 		spellTableModel.setSpells(noitaData.spells)
 		spellTable.rowHeight = 32
+		spellTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION)
 		spellTable.selectionModel.addListSelectionListener { onSelectSpell(it) }
 		spellSearchTextField.addActionListener { onSpellSearchText(it) }
 
 		boneWandTableModel.setBoneWands(noitaData.boneWands)
+		boneWandTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION)
 		boneWandTable.selectionModel.addListSelectionListener { onSelectBoneWand(it) }
 
 		if (config.salakieliSplitterPosition != -1) {
@@ -163,6 +165,7 @@ class MainForm(private val config: AppConfig, private val frame: JFrame, private
 		if (config.noitaBackupFolder.isNotEmpty() && !(File(config.noitaBackupFolder).exists())) {
 			File(config.noitaBackupFolder).mkdirs()
 		}
+		fileTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION)
 		setupTableSizes(fileTable)
 		loadBackupFiles()
 
@@ -214,6 +217,7 @@ class MainForm(private val config: AppConfig, private val frame: JFrame, private
 			}
 			fileTable.selectedRows.forEach { rowIdx ->
 				val f = fileTableModel.items[rowIdx]
+				println("-=-= row $rowIdx, file: ${f.name}")
 				val fileName = f.name
 				if (!f.delete()) throw RuntimeException("Unable to delete ${f.canonicalPath}")
 				ActivityLog.logAction(ActivityType.DELETE, fileName)
