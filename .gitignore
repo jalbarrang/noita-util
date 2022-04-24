@@ -1,4 +1,5 @@
 *.iml
+*.exe
 .idea/
 .DS_Store
 target/

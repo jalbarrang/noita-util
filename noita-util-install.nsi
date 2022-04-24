@@ -1,4 +1,4 @@
-!define SOURCE_DIR "C:\Users\dkilm\code\noita-util\noita-util"
+!define SOURCE_DIR "C:\Users\dkilm\code\noita-util\build\distributions\noita-util-x64_windows-1.2.0"
 !define APPNAME "noita-util"
 !define COMPANYNAME "alter_ukko"
 !define DESCRIPTION "A collection of utilities for Noita"
@@ -23,7 +23,7 @@ InstallDir "$PROGRAMFILES64\${APPNAME}"
 # LicenseData "license.rtf"
 # This will be in the installer/uninstaller's title bar
 Name "${COMPANYNAME} - ${APPNAME}"
-Icon "${SOURCE_DIR}\resources\noita-util.ico"
+Icon "${SOURCE_DIR}\bin\noita-util.ico"
 outFile "noita-util-${VERSIONMAJOR}.${VERSIONMINOR}.${VERSIONBUILD}.exe"
  
 !include LogicLib.nsh
@@ -38,11 +38,9 @@ section "install"
 	setOutPath $INSTDIR
 	# Files added here should be removed by the uninstaller (see section "uninstall")
 
-	file "${SOURCE_DIR}\noita-util.exe"
-	file "${SOURCE_DIR}\noita-util.json"
-	file "${SOURCE_DIR}\*.jar"
+	file /r "${SOURCE_DIR}\bin"
 	file /r "${SOURCE_DIR}\jre"
-	file /r "${SOURCE_DIR}\resources"
+	file /r "${SOURCE_DIR}\lib"
 
 	# Add any other files for the install directory (license files, app data, etc) here
  
@@ -50,7 +48,7 @@ section "install"
 	writeUninstaller "$INSTDIR\uninstall.exe"
  
 	# Desktop
-	createShortCut "$DESKTOP\${APPNAME}.lnk" "$INSTDIR\noita-util.exe" "" "$INSTDIR\resources\noita-util.ico"
+	createShortCut "$DESKTOP\${APPNAME}.lnk" "$INSTDIR\bin\noita-util.bat" "" "$INSTDIR\bin\noita-util.ico"
  
 	# Registry information for add\remove programs
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "DisplayName" "${COMPANYNAME} - ${APPNAME} - ${DESCRIPTION}"
@@ -89,11 +87,9 @@ section "uninstall"
 	delete "$DESKTOP\${APPNAME}.lnk"
  
 	# Remove files
-	delete "$INSTDIR\noita-util.exe"
-	delete "$INSTDIR\noita-util.json"
-	delete "$INSTDIR\*.jar"
+	rmDir /r "$INSTDIR\bin"
 	rmDir /r "$INSTDIR\jre"
-	rmDir /r "$INSTDIR\resources"
+	rmDir /r "$INSTDIR\lib"
 
  
 	# Always delete uninstaller as the last action
