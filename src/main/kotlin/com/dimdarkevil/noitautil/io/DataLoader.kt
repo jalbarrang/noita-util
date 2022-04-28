@@ -220,18 +220,28 @@ fun loadPerks(config: AppConfig, translations: Map<String, String>, cb: ((String
 fun loadBoneWands(config: AppConfig, spells: List<Spell>, cb: ((String) -> Unit)? = null) : List<BoneWand> {
 	val spellMap = spells.associateBy { it.id }
 	val boneFolder = File(File(config.noitaSaveFolder), "save00/persistent/bones_new")
-	return boneFolder.listFiles()?.filter { it.extension.lowercase() == "xml" }?.map {
-		cb?.invoke("bone wand: ${it.name}")
-		val boneWand = loadBoneWand(it, spellMap)
-		boneWand.wand.image = ImageIO.read(File(File(config.noitaSaveFolder), "${boneWand.wand.spriteFile}"))
-		boneWand.wand.rotatedImage = rotateImageByDegrees(boneWand.wand.image!!, 270.0)
-		boneWand.wand.alwaysCasts.forEach { spell ->
-			spell.uiImage = ImageIO.read(File(File(config.noitaSaveFolder), "${spell.uiImageFilename}"))
+	return boneFolder.listFiles()?.filter { it.extension.lowercase() == "xml" }?.mapNotNull {
+		try {
+			cb?.invoke("bone wand: ${it.name}")
+			val boneWand = loadBoneWand(it, spellMap)
+			try {
+				boneWand.wand.image = ImageIO.read(File(File(config.noitaSaveFolder), "${boneWand.wand.spriteFile}"))
+				boneWand.wand.rotatedImage = rotateImageByDegrees(boneWand.wand.image!!, 270.0)
+				boneWand.wand.alwaysCasts.forEach { spell ->
+					spell.uiImage = ImageIO.read(File(File(config.noitaSaveFolder), "${spell.uiImageFilename}"))
+				}
+				boneWand.wand.spells.forEach { spell ->
+					spell.uiImage = ImageIO.read(File(File(config.noitaSaveFolder), "${spell.uiImageFilename}"))
+				}
+				boneWand
+			} catch (e: Exception) {
+				println("Bad bone wand file: data is ${boneWand.wand}")
+				throw e
+			}
+		} catch (e: Exception) {
+			println("error loading bone wand file ${it.name}: ${e.message}")
+			null
 		}
-		boneWand.wand.spells.forEach { spell ->
-			spell.uiImage = ImageIO.read(File(File(config.noitaSaveFolder), "${spell.uiImageFilename}"))
-		}
-		boneWand
 	} ?: listOf()
 }
 

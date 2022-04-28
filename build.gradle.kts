@@ -17,7 +17,7 @@ val x64Mac = "x64_mac"
 val aarch64Mac = "aarch64_mac"
 
 group = "com.dimdarkevil"
-version = "1.2.0"
+version = "1.2.1"
 
 repositories {
     mavenCentral()

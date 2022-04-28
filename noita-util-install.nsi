@@ -1,11 +1,11 @@
-!define SOURCE_DIR "C:\Users\dkilm\code\noita-util\build\distributions\noita-util-x64_windows-1.2.0"
+!define SOURCE_DIR "C:\Users\dkilm\code\noita-util\build\distributions\noita-util-x64_windows-1.2.1"
 !define APPNAME "noita-util"
 !define COMPANYNAME "alter_ukko"
 !define DESCRIPTION "A collection of utilities for Noita"
 # These three must be integers
 !define VERSIONMAJOR 1
-!define VERSIONMINOR 1
-!define VERSIONBUILD 0
+!define VERSIONMINOR 2
+!define VERSIONBUILD 1
 # These will be displayed by the "Click here for support information" link in "Add/Remove Programs"
 # It is possible to use "mailto:" links in here to open the email client
 !define HELPURL "https://gitlab.com/alter_ukko/noita-util" # "Support Information" link
