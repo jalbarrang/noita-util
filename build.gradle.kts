@@ -17,7 +17,7 @@ val x64Mac = "x64_mac"
 val aarch64Mac = "aarch64_mac"
 
 group = "com.dimdarkevil"
-version = "1.2.1"
+version = "1.2.2"
 
 repositories {
     mavenCentral()
@@ -157,6 +157,9 @@ distributions {
                 from("${buildDir}/scripts") {
                     fileMode = Integer.parseInt("755", 8)
                 } // or 493 which is 755 base 8 in base 10
+            }
+            into("bin") {
+                from("${projectDir}/src/main/resources/noita-util.ico")
             }
             // Copy the jar of the cli (ie the actual project artifact generated)
             into("lib") {

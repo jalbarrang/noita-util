@@ -223,9 +223,18 @@ fun loadBoneWands(config: AppConfig, spells: List<Spell>, cb: ((String) -> Unit)
 	return boneFolder.listFiles()?.filter { it.extension.lowercase() == "xml" }?.mapNotNull {
 		try {
 			cb?.invoke("bone wand: ${it.name}")
+			println("bone wand: ${it.name}")
 			val boneWand = loadBoneWand(it, spellMap)
 			try {
-				boneWand.wand.image = ImageIO.read(File(File(config.noitaSaveFolder), "${boneWand.wand.spriteFile}"))
+				val imgFile = File(File(config.noitaSaveFolder), "${boneWand.wand.spriteFile}")
+				println("imgFile = ${imgFile.canonicalPath}")
+				boneWand.wand.image = if (imgFile.extension.lowercase() == "png") {
+					ImageIO.read(imgFile)
+				} else {
+					val realImgFile = File(config.noitaSaveFolder, getImageFromXmlFile(imgFile))
+					println("-=-=  ${realImgFile.canonicalPath}")
+					ImageIO.read(realImgFile)
+				}
 				boneWand.wand.rotatedImage = rotateImageByDegrees(boneWand.wand.image!!, 270.0)
 				boneWand.wand.alwaysCasts.forEach { spell ->
 					spell.uiImage = ImageIO.read(File(File(config.noitaSaveFolder), "${spell.uiImageFilename}"))
@@ -272,6 +281,12 @@ fun loadBoneWand(f: File, spells: Map<String, Spell>) : BoneWand {
 		lastModified = fileModified,
 		wand = wand
 	)
+}
+
+fun getImageFromXmlFile(xmlFile: File) : String {
+	val doc = Jsoup.parse(xmlFile, "UTF-8", "", Parser.xmlParser())
+	val filename = doc.select("Sprite").first()?.attributes()?.get("filename") ?: ""
+	return filename
 }
 
 fun String.toIntViaFloat() = this.split(".").first().toInt()
