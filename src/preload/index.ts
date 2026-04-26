@@ -1,12 +1,19 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { electronAPI } from '@electron-toolkit/preload';
-import type { AppConfig, MemoryStatus, NoitaUtilApi } from '../shared/types.js';
+import type {
+  AppConfig,
+  ConfigPathValidationResult,
+  MemoryStatus,
+  NoitaUtilApi,
+} from '../shared/types.js';
 
 // Custom APIs for renderer
 const noitaUtil: NoitaUtilApi = {
   config: {
     load: () => ipcRenderer.invoke('config:load') as Promise<AppConfig>,
     save: (config) => ipcRenderer.invoke('config:save', config) as Promise<AppConfig>,
+    validatePaths: () =>
+      ipcRenderer.invoke('config:validate-paths') as Promise<ConfigPathValidationResult>,
   },
   dialog: {
     selectFolder: () => ipcRenderer.invoke('dialog:select-folder') as Promise<string | undefined>,

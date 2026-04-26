@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
+import { createRootRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { SettingsIcon } from "lucide-react";
+import { SetupGate } from "@renderer/components/setup-gate";
 import { Toaster } from "@renderer/components/ui/sonner";
 import { Separator } from "@renderer/components/ui/separator";
 import { TooltipProvider } from "@renderer/components/ui/tooltip";
@@ -15,6 +16,8 @@ const tabs: Array<{ to: string; label: string; disabled?: boolean }> = [
 ];
 
 const memoryStatusQueryKey = ["noitaProcess", "memoryStatus"];
+const configQueryKey = ["config"];
+const configValidationQueryKey = ["config", "validation"];
 
 const lookingForNoitaStatus: MemoryStatus = {
   message: "looking for noita process...",
@@ -24,6 +27,7 @@ const lookingForNoitaStatus: MemoryStatus = {
 
 const RootLayout = () => {
   const queryClient = useQueryClient();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
   const memoryStatusQuery = useQuery({
     queryKey: memoryStatusQueryKey,
     queryFn: async () => {
@@ -34,6 +38,21 @@ const RootLayout = () => {
       }
     },
   });
+  const configQuery = useQuery({
+    queryKey: configQueryKey,
+    queryFn: () => window.noitaUtil.config.load(),
+  });
+  const validationQuery = useQuery({
+    queryKey: configValidationQueryKey,
+    queryFn: () => window.noitaUtil.config.validatePaths(),
+    enabled: Boolean(configQuery.data),
+  });
+
+  const setupRequired = validationQuery.data?.valid === false;
+  const showSetupGate = setupRequired && pathname !== "/settings";
+  const checkingPaths =
+    pathname !== "/settings" &&
+    (configQuery.isLoading || (Boolean(configQuery.data) && validationQuery.isLoading));
 
   useEffect(() => {
     return window.noitaUtil.noitaProcess.onMemoryStatus((status) => {
@@ -47,7 +66,7 @@ const RootLayout = () => {
         <header className="flex h-12 items-center justify-between border-b px-4">
           <nav className="flex items-center gap-1 text-xs">
             {tabs.map((tab) =>
-              tab.disabled ? (
+              tab.disabled || setupRequired ? (
                 <span
                   key={tab.to}
                   className="rounded-md px-3 py-1.5 text-muted-foreground/60"
@@ -81,7 +100,15 @@ const RootLayout = () => {
         </header>
 
         <main className="min-h-0 flex-1 overflow-hidden p-4">
-          <Outlet />
+          {showSetupGate && configQuery.data && validationQuery.data ? (
+            <SetupGate config={configQuery.data} validation={validationQuery.data} />
+          ) : checkingPaths ? (
+            <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+              Checking Noita paths...
+            </div>
+          ) : (
+            <Outlet />
+          )}
         </main>
 
         <Separator />

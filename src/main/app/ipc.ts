@@ -1,6 +1,6 @@
 import { BrowserWindow, dialog, ipcMain, type OpenDialogOptions } from 'electron';
 import { getActivityLog } from '../domains/activity-log/activity-log-service.js';
-import { loadConfig, saveConfig } from '../domains/config/config-service.js';
+import { loadConfig, saveConfig, validatePaths } from '../domains/config/config-service.js';
 import { loadNoitaData } from '../domains/noita-data/noita-data-service.js';
 import { getMemoryStatus, runSeed } from '../domains/noita-process/noita-process-service.js';
 import { decryptAllSalakieli } from '../domains/salakieli/salakieli-service.js';
@@ -15,6 +15,7 @@ import type { AppConfig, FilePickerFilter } from '../../shared/types.js';
 export function registerIpcHandlers(): void {
   ipcMain.handle('config:load', () => loadConfig());
   ipcMain.handle('config:save', (_event, config: AppConfig) => saveConfig(config));
+  ipcMain.handle('config:validate-paths', () => validatePaths());
 
   ipcMain.handle('dialog:select-folder', async (event) => {
     const browserWindow = BrowserWindow.fromWebContents(event.sender);

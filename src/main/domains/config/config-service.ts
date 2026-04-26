@@ -1,7 +1,7 @@
-import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { access, mkdir, readFile, stat, writeFile } from 'node:fs/promises';
+import { basename, join } from 'node:path';
 import { homedir } from 'node:os';
-import type { AppConfig } from '../../../shared/types.js';
+import type { AppConfig, ConfigPathValidationResult } from '../../../shared/types.js';
 import { APP_NAME } from '../../../shared/types.js';
 
 const home = homedir();
@@ -61,4 +61,32 @@ export async function saveConfig(config: AppConfig): Promise<AppConfig> {
   await mkdir(legacyConfigDir, { recursive: true });
   await writeFile(legacyConfigFile, `${JSON.stringify(config, null, 2)}\n`, 'utf8');
   return config;
+}
+
+export async function validatePaths(): Promise<ConfigPathValidationResult> {
+  const config = await loadConfig();
+  const errors: ConfigPathValidationResult['errors'] = {};
+
+  const saveFolder = await stat(config.noitaSaveFolder).catch(() => null);
+  if (!saveFolder?.isDirectory()) {
+    errors.noitaSaveFolder = `Directory does not exist: ${config.noitaSaveFolder}`;
+  } else {
+    const gunActions = join(config.noitaSaveFolder, 'data', 'scripts', 'gun', 'gun_actions.lua');
+    const gunActionsFile = await stat(gunActions).catch(() => null);
+    if (!gunActionsFile?.isFile()) {
+      errors.noitaSaveFolder = 'Missing game data files in save folder';
+    }
+  }
+
+  const exeFile = await stat(config.noitaExeFile).catch(() => null);
+  if (!exeFile?.isFile()) {
+    errors.noitaExeFile = `File does not exist: ${config.noitaExeFile}`;
+  } else {
+    const exeName = basename(config.noitaExeFile).toLowerCase();
+    if (exeName !== 'noita.exe' && exeName !== 'noita_dev.exe') {
+      errors.noitaExeFile = `Expected noita.exe or noita_dev.exe, got ${basename(config.noitaExeFile)}`;
+    }
+  }
+
+  return { valid: Object.keys(errors).length === 0, errors };
 }

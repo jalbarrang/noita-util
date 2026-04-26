@@ -128,10 +128,20 @@ export type FilePickerFilter = {
   extensions: string[];
 };
 
+export type ConfigPathValidationResult = {
+  valid: boolean;
+  errors: {
+    noitaSaveFolder?: string;
+    noitaExeFile?: string;
+    noitaBackupFolder?: string;
+  };
+};
+
 export type NoitaUtilApi = {
   config: {
     load: () => Promise<AppConfig>;
     save: (config: AppConfig) => Promise<AppConfig>;
+    validatePaths: () => Promise<ConfigPathValidationResult>;
   };
   dialog: {
     selectFolder: () => Promise<string | undefined>;

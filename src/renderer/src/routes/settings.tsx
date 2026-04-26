@@ -15,6 +15,7 @@ export const Route = createFileRoute('/settings')({
 });
 
 const configQueryKey = ['config'];
+const configValidationQueryKey = ['config', 'validation'];
 const noitaExeFilters = [{ name: 'Noita executable', extensions: ['exe'] }];
 
 type SettingsForm = {
@@ -92,6 +93,7 @@ function SettingsPage() {
         memoryUseEverySec,
       });
       queryClient.setQueryData(configQueryKey, saved);
+      void queryClient.invalidateQueries({ queryKey: configValidationQueryKey });
       setForm(toSettingsForm(saved));
       toast.success('Settings saved');
     } catch (error) {
