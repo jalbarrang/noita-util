@@ -1,8 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   ArchiveIcon,
   FileClockIcon,
+  PlayIcon,
   RefreshCwIcon,
   RotateCcwIcon,
   Trash2Icon,
@@ -55,12 +56,33 @@ function HomePage() {
   const [restoreOpen, setRestoreOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [activityOpen, setActivityOpen] = useState(false);
+  const [runSeedOpen, setRunSeedOpen] = useState(false);
   const [activityLog, setActivityLog] = useState<Activity[]>([]);
   const [backupName, setBackupName] = useState(defaultBackupName);
+  const [seedInput, setSeedInput] = useState("");
 
   const backupsQuery = useQuery({
     queryKey: ["saves", "backups"],
     queryFn: () => window.noitaUtil.saves.listBackups(),
+  });
+
+  const configQuery = useQuery({
+    queryKey: ["config"],
+    queryFn: () => window.noitaUtil.config.load(),
+  });
+
+  const runSeedMutation = useMutation({
+    mutationFn: (seed: number) => window.noitaUtil.noitaProcess.runSeed(seed),
+    onSuccess: async (_data, seed) => {
+      toast.success("Noita launched", { description: `seed ${seed}` });
+      setRunSeedOpen(false);
+      await configQuery.refetch();
+    },
+    onError: (error) => {
+      toast.error("Could not run seed", {
+        description: getErrorMessage(error),
+      });
+    },
   });
 
   const backups = backupsQuery.data ?? EMPTY_BACKUPS;
@@ -98,6 +120,25 @@ function HomePage() {
   const openCreateDialog = () => {
     setBackupName(defaultBackupName());
     setCreateOpen(true);
+  };
+
+  const openRunSeedDialog = () => {
+    setSeedInput(String(configQuery.data?.lastSeed ?? ""));
+    setRunSeedOpen(true);
+  };
+
+  const handleRunSeed = () => {
+    const trimmedSeed = seedInput.trim();
+    const seed = Number(trimmedSeed);
+
+    if (trimmedSeed === "" || !Number.isInteger(seed)) {
+      toast.error("Invalid seed", {
+        description: "Seed must be an integer",
+      });
+      return;
+    }
+
+    runSeedMutation.mutate(seed);
   };
 
   const createBackup = async () => {
@@ -215,6 +256,14 @@ function HomePage() {
           >
             <FileClockIcon />
             log
+          </Button>
+          <Button
+            variant="outline"
+            onClick={openRunSeedDialog}
+            disabled={busy || runSeedMutation.isPending}
+          >
+            <PlayIcon />
+            run seed
           </Button>
         </div>
         <div className="text-xs text-muted-foreground">
@@ -413,6 +462,40 @@ function HomePage() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setActivityOpen(false)}>
               close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={runSeedOpen} onOpenChange={setRunSeedOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Run Seed</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-2">
+            <Label htmlFor="seed-input">seed</Label>
+            <Input
+              id="seed-input"
+              value={seedInput}
+              onChange={(event) => setSeedInput(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") handleRunSeed();
+              }}
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setRunSeedOpen(false)}
+              disabled={runSeedMutation.isPending}
+            >
+              cancel
+            </Button>
+            <Button
+              onClick={handleRunSeed}
+              disabled={runSeedMutation.isPending}
+            >
+              run
             </Button>
           </DialogFooter>
         </DialogContent>

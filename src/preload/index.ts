@@ -8,6 +8,11 @@ const noitaUtil: NoitaUtilApi = {
     load: () => ipcRenderer.invoke('config:load') as Promise<AppConfig>,
     save: (config) => ipcRenderer.invoke('config:save', config) as Promise<AppConfig>,
   },
+  dialog: {
+    selectFolder: () => ipcRenderer.invoke('dialog:select-folder') as Promise<string | undefined>,
+    selectFile: (filters) =>
+      ipcRenderer.invoke('dialog:select-file', filters) as Promise<string | undefined>,
+  },
   activityLog: {
     list: () => ipcRenderer.invoke('activity-log:list'),
   },

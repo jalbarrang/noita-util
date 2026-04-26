@@ -123,10 +123,19 @@ export type MemoryStatus = {
   overWarning: boolean;
 };
 
+export type FilePickerFilter = {
+  name: string;
+  extensions: string[];
+};
+
 export type NoitaUtilApi = {
   config: {
     load: () => Promise<AppConfig>;
     save: (config: AppConfig) => Promise<AppConfig>;
+  };
+  dialog: {
+    selectFolder: () => Promise<string | undefined>;
+    selectFile: (filters: FilePickerFilter[]) => Promise<string | undefined>;
   };
   activityLog: {
     list: () => Promise<ActivityList>;

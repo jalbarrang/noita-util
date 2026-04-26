@@ -9,11 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SalakieliRouteImport } from './routes/salakieli'
 import { Route as QuickrefRouteImport } from './routes/quickref'
 import { Route as BoneWandsRouteImport } from './routes/bone-wands'
 import { Route as IndexRouteImport } from './routes/index'
 
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SalakieliRoute = SalakieliRouteImport.update({
   id: '/salakieli',
   path: '/salakieli',
@@ -40,12 +46,14 @@ export interface FileRoutesByFullPath {
   '/bone-wands': typeof BoneWandsRoute
   '/quickref': typeof QuickrefRoute
   '/salakieli': typeof SalakieliRoute
+  '/settings': typeof SettingsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/bone-wands': typeof BoneWandsRoute
   '/quickref': typeof QuickrefRoute
   '/salakieli': typeof SalakieliRoute
+  '/settings': typeof SettingsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,20 @@ export interface FileRoutesById {
   '/bone-wands': typeof BoneWandsRoute
   '/quickref': typeof QuickrefRoute
   '/salakieli': typeof SalakieliRoute
+  '/settings': typeof SettingsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/bone-wands' | '/quickref' | '/salakieli'
+  fullPaths: '/' | '/bone-wands' | '/quickref' | '/salakieli' | '/settings'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/bone-wands' | '/quickref' | '/salakieli'
-  id: '__root__' | '/' | '/bone-wands' | '/quickref' | '/salakieli'
+  to: '/' | '/bone-wands' | '/quickref' | '/salakieli' | '/settings'
+  id:
+    | '__root__'
+    | '/'
+    | '/bone-wands'
+    | '/quickref'
+    | '/salakieli'
+    | '/settings'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,10 +82,18 @@ export interface RootRouteChildren {
   BoneWandsRoute: typeof BoneWandsRoute
   QuickrefRoute: typeof QuickrefRoute
   SalakieliRoute: typeof SalakieliRoute
+  SettingsRoute: typeof SettingsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/salakieli': {
       id: '/salakieli'
       path: '/salakieli'
@@ -107,6 +130,7 @@ const rootRouteChildren: RootRouteChildren = {
   BoneWandsRoute: BoneWandsRoute,
   QuickrefRoute: QuickrefRoute,
   SalakieliRoute: SalakieliRoute,
+  SettingsRoute: SettingsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
