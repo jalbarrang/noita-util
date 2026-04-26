@@ -1,7 +1,14 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { ArchiveIcon, FileClockIcon, RefreshCwIcon, RotateCcwIcon, Trash2Icon } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { toast } from 'sonner';
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
+import {
+  ArchiveIcon,
+  FileClockIcon,
+  RefreshCwIcon,
+  RotateCcwIcon,
+  Trash2Icon,
+} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 import {
   AlertDialog,
@@ -12,17 +19,17 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@renderer/components/ui/alert-dialog';
-import { Button } from '@renderer/components/ui/button';
+} from "@renderer/components/ui/alert-dialog";
+import { Button } from "@renderer/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@renderer/components/ui/dialog';
-import { Input } from '@renderer/components/ui/input';
-import { Label } from '@renderer/components/ui/label';
+} from "@renderer/components/ui/dialog";
+import { Input } from "@renderer/components/ui/input";
+import { Label } from "@renderer/components/ui/label";
 import {
   Table,
   TableBody,
@@ -30,17 +37,17 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@renderer/components/ui/table';
-import type { Activity, BackupEntry } from '../../../shared/types';
+} from "@renderer/components/ui/table";
+import type { Activity, BackupEntry } from "../../../shared/types";
 
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
 function HomePage() {
-  const [backups, setBackups] = useState<BackupEntry[]>([]);
-  const [selectedNames, setSelectedNames] = useState<Set<string>>(() => new Set());
-  const [loading, setLoading] = useState(true);
+  const [selectedNames, setSelectedNames] = useState<Set<string>>(
+    () => new Set()
+  );
   const [busy, setBusy] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [restoreOpen, setRestoreOpen] = useState(false);
@@ -49,32 +56,26 @@ function HomePage() {
   const [activityLog, setActivityLog] = useState<Activity[]>([]);
   const [backupName, setBackupName] = useState(defaultBackupName);
 
+  const backupsQuery = useQuery({
+    queryKey: ["saves", "backups"],
+    queryFn: () => window.noitaUtil.saves.listBackups(),
+  });
+
+  const backups = backupsQuery.data ?? [];
+
   const selectedBackups = useMemo(
     () => backups.filter((backup) => selectedNames.has(backup.name)),
-    [backups, selectedNames],
+    [backups, selectedNames]
   );
 
   const sortedBackups = useMemo(
-    () => [...backups].sort((left, right) => Date.parse(right.lastModified) - Date.parse(left.lastModified)),
-    [backups],
+    () =>
+      [...backups].sort(
+        (left, right) =>
+          Date.parse(right.lastModified) - Date.parse(left.lastModified)
+      ),
+    [backups]
   );
-
-  const loadBackups = useCallback(async () => {
-    setLoading(true);
-    try {
-      const entries = await window.noitaUtil.saves.listBackups();
-      setBackups(entries);
-      setSelectedNames((current) => new Set([...current].filter((name) => entries.some((entry) => entry.name === name))));
-    } catch (error) {
-      toast.error('Could not load backups', { description: getErrorMessage(error) });
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void loadBackups();
-  }, [loadBackups]);
 
   const toggleBackup = (name: string) => {
     setSelectedNames((current) => {
@@ -86,8 +87,8 @@ function HomePage() {
   };
 
   const toggleAllBackups = () => {
-    setSelectedNames((current) => {
-      if (current.size === sortedBackups.length) return new Set();
+    setSelectedNames(() => {
+      if (selectedBackups.length === sortedBackups.length) return new Set();
       return new Set(sortedBackups.map((backup) => backup.name));
     });
   };
@@ -100,12 +101,16 @@ function HomePage() {
   const createBackup = async () => {
     setBusy(true);
     try {
-      const backup = await window.noitaUtil.saves.createBackup(backupName.trim() || undefined);
-      toast.success('Backup created', { description: backup.name });
+      const backup = await window.noitaUtil.saves.createBackup(
+        backupName.trim() || undefined
+      );
+      toast.success("Backup created", { description: backup.name });
       setCreateOpen(false);
-      await loadBackups();
+      await backupsQuery.refetch();
     } catch (error) {
-      toast.error('Could not create backup', { description: getErrorMessage(error) });
+      toast.error("Could not create backup", {
+        description: getErrorMessage(error),
+      });
     } finally {
       setBusy(false);
     }
@@ -118,11 +123,13 @@ function HomePage() {
     setBusy(true);
     try {
       await window.noitaUtil.saves.restoreBackup(backup.name, backupFirst);
-      toast.success('Backup restored', { description: backup.name });
+      toast.success("Backup restored", { description: backup.name });
       setRestoreOpen(false);
-      await loadBackups();
+      await backupsQuery.refetch();
     } catch (error) {
-      toast.error('Could not restore backup', { description: getErrorMessage(error) });
+      toast.error("Could not restore backup", {
+        description: getErrorMessage(error),
+      });
     } finally {
       setBusy(false);
     }
@@ -135,12 +142,16 @@ function HomePage() {
     setBusy(true);
     try {
       await window.noitaUtil.saves.deleteBackups(names);
-      toast.success('Backups deleted', { description: `${names.length} removed` });
+      toast.success("Backups deleted", {
+        description: `${names.length} removed`,
+      });
       setDeleteOpen(false);
       setSelectedNames(new Set());
-      await loadBackups();
+      await backupsQuery.refetch();
     } catch (error) {
-      toast.error('Could not delete backups', { description: getErrorMessage(error) });
+      toast.error("Could not delete backups", {
+        description: getErrorMessage(error),
+      });
     } finally {
       setBusy(false);
     }
@@ -150,9 +161,16 @@ function HomePage() {
     setActivityOpen(true);
     try {
       const log = await window.noitaUtil.activityLog.list();
-      setActivityLog([...log.activities].sort((left, right) => Date.parse(right.dateTime) - Date.parse(left.dateTime)));
+      setActivityLog(
+        [...log.activities].sort(
+          (left, right) =>
+            Date.parse(right.dateTime) - Date.parse(left.dateTime)
+        )
+      );
     } catch (error) {
-      toast.error('Could not load activity log', { description: getErrorMessage(error) });
+      toast.error("Could not load activity log", {
+        description: getErrorMessage(error),
+      });
     }
   };
 
@@ -172,7 +190,11 @@ function HomePage() {
             <RotateCcwIcon />
             restore
           </Button>
-          <Button variant="outline" onClick={() => void loadBackups()} disabled={busy || loading}>
+          <Button
+            variant="outline"
+            onClick={() => void backupsQuery.refetch()}
+            disabled={busy || backupsQuery.isFetching}
+          >
             <RefreshCwIcon />
             refresh
           </Button>
@@ -184,7 +206,11 @@ function HomePage() {
             <Trash2Icon />
             delete
           </Button>
-          <Button variant="ghost" onClick={() => void openActivityLog()} disabled={busy}>
+          <Button
+            variant="ghost"
+            onClick={() => void openActivityLog()}
+            disabled={busy}
+          >
             <FileClockIcon />
             log
           </Button>
@@ -202,7 +228,10 @@ function HomePage() {
                 <input
                   type="checkbox"
                   aria-label="Select all backups"
-                  checked={sortedBackups.length > 0 && selectedNames.size === sortedBackups.length}
+                  checked={
+                    sortedBackups.length > 0 &&
+                    selectedBackups.length === sortedBackups.length
+                  }
                   onChange={toggleAllBackups}
                 />
               </TableHead>
@@ -217,7 +246,7 @@ function HomePage() {
               return (
                 <TableRow
                   key={backup.name}
-                  data-state={selected ? 'selected' : undefined}
+                  data-state={selected ? "selected" : undefined}
                   onClick={() => toggleBackup(backup.name)}
                   className="cursor-default"
                 >
@@ -231,20 +260,28 @@ function HomePage() {
                   </TableCell>
                   <TableCell className="font-medium">{backup.name}</TableCell>
                   <TableCell>{formatDate(backup.lastModified)}</TableCell>
-                  <TableCell className="text-right tabular-nums">{formatBytes(backup.size)}</TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {formatBytes(backup.size)}
+                  </TableCell>
                 </TableRow>
               );
             })}
-            {!loading && sortedBackups.length === 0 && (
+            {!backupsQuery.isFetching && sortedBackups.length === 0 && (
               <TableRow>
-                <TableCell colSpan={4} className="h-32 text-center text-muted-foreground">
+                <TableCell
+                  colSpan={4}
+                  className="h-32 text-center text-muted-foreground"
+                >
                   No backups found.
                 </TableCell>
               </TableRow>
             )}
-            {loading && (
+            {backupsQuery.isFetching && (
               <TableRow>
-                <TableCell colSpan={4} className="h-32 text-center text-muted-foreground">
+                <TableCell
+                  colSpan={4}
+                  className="h-32 text-center text-muted-foreground"
+                >
                   Loading backups...
                 </TableCell>
               </TableRow>
@@ -265,12 +302,16 @@ function HomePage() {
               value={backupName}
               onChange={(event) => setBackupName(event.target.value)}
               onKeyDown={(event) => {
-                if (event.key === 'Enter') void createBackup();
+                if (event.key === "Enter") void createBackup();
               }}
             />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateOpen(false)} disabled={busy}>
+            <Button
+              variant="outline"
+              onClick={() => setCreateOpen(false)}
+              disabled={busy}
+            >
               cancel
             </Button>
             <Button onClick={() => void createBackup()} disabled={busy}>
@@ -285,15 +326,23 @@ function HomePage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Restore backup?</AlertDialogTitle>
             <AlertDialogDescription>
-              Restore {selectedBackups[0]?.name}. Create a new backup before restoring?
+              Restore {selectedBackups[0]?.name}. Create a new backup before
+              restoring?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={busy}>cancel</AlertDialogCancel>
-            <AlertDialogAction variant="outline" disabled={busy} onClick={() => void restoreBackup(false)}>
+            <AlertDialogAction
+              variant="outline"
+              disabled={busy}
+              onClick={() => void restoreBackup(false)}
+            >
               no
             </AlertDialogAction>
-            <AlertDialogAction disabled={busy} onClick={() => void restoreBackup(true)}>
+            <AlertDialogAction
+              disabled={busy}
+              onClick={() => void restoreBackup(true)}
+            >
               yes
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -305,12 +354,17 @@ function HomePage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete backups?</AlertDialogTitle>
             <AlertDialogDescription>
-              Delete {selectedBackups.length} selected backup{selectedBackups.length === 1 ? '' : 's'}.
+              Delete {selectedBackups.length} selected backup
+              {selectedBackups.length === 1 ? "" : "s"}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={busy}>cancel</AlertDialogCancel>
-            <AlertDialogAction variant="destructive" disabled={busy} onClick={() => void deleteBackups()}>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={busy}
+              onClick={() => void deleteBackups()}
+            >
               delete
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -333,7 +387,9 @@ function HomePage() {
               </TableHeader>
               <TableBody>
                 {activityLog.map((activity) => (
-                  <TableRow key={`${activity.dateTime}-${activity.activityType}-${activity.fileName}`}>
+                  <TableRow
+                    key={`${activity.dateTime}-${activity.activityType}-${activity.fileName}`}
+                  >
                     <TableCell>{formatDate(activity.dateTime)}</TableCell>
                     <TableCell>{activity.activityType}</TableCell>
                     <TableCell>{activity.fileName}</TableCell>
@@ -341,7 +397,10 @@ function HomePage() {
                 ))}
                 {activityLog.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={3} className="h-24 text-center text-muted-foreground">
+                    <TableCell
+                      colSpan={3}
+                      className="h-24 text-center text-muted-foreground"
+                    >
                       No activity recorded.
                     </TableCell>
                   </TableRow>
@@ -362,7 +421,7 @@ function HomePage() {
 
 function defaultBackupName() {
   const now = new Date();
-  const pad = (value: number) => value.toString().padStart(2, '0');
+  const pad = (value: number) => value.toString().padStart(2, "0");
   return `save_${now.getFullYear()}_${pad(now.getMonth() + 1)}_${pad(now.getDate())}_${pad(now.getHours())}_${pad(now.getMinutes())}`;
 }
 
@@ -370,18 +429,18 @@ function formatDate(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return new Intl.DateTimeFormat(undefined, {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
   }).format(date);
 }
 
 function formatBytes(value: number) {
   if (value < 1024) return `${value} B`;
-  const units = ['KB', 'MB', 'GB', 'TB'];
+  const units = ["KB", "MB", "GB", "TB"];
   let size = value / 1024;
   let unitIndex = 0;
 
@@ -394,5 +453,5 @@ function formatBytes(value: number) {
 }
 
 function getErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : 'Unknown error';
+  return error instanceof Error ? error.message : "Unknown error";
 }

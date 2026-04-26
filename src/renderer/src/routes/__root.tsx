@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createRootRoute, Link, Outlet } from '@tanstack/react-router';
 import { Toaster } from '@renderer/components/ui/sonner';
 import { Separator } from '@renderer/components/ui/separator';
@@ -12,42 +13,32 @@ const tabs = [
   { to: '/bone-wands', label: 'bone wands', disabled: true },
 ];
 
+const memoryStatusQueryKey = ['noitaProcess', 'memoryStatus'];
+
+const lookingForNoitaStatus: MemoryStatus = {
+  message: 'looking for noita process...',
+  processFound: false,
+  overWarning: false,
+};
+
 const RootLayout = () => {
-  const [memoryStatus, setMemoryStatus] = useState<MemoryStatus | null>(null);
+  const queryClient = useQueryClient();
+  const memoryStatusQuery = useQuery({
+    queryKey: memoryStatusQueryKey,
+    queryFn: async () => {
+      try {
+        return await window.noitaUtil.noitaProcess.getMemoryStatus();
+      } catch {
+        return lookingForNoitaStatus;
+      }
+    },
+  });
 
   useEffect(() => {
-    let unsubscribe: (() => void) | undefined;
-    let mounted = true;
-
-    window.noitaUtil.noitaProcess
-      .getMemoryStatus()
-      .then((status) => {
-        if (mounted) setMemoryStatus(status);
-      })
-      .catch(() => {
-        if (mounted) {
-          setMemoryStatus({
-            message: 'looking for noita process...',
-            processFound: false,
-            overWarning: false,
-          });
-        }
-      });
-
-    window.noitaUtil.noitaProcess
-      .startMemoryMonitor()
-      .then(() => {
-        if (!mounted) return;
-        unsubscribe = window.noitaUtil.noitaProcess.onMemoryStatus(setMemoryStatus);
-      })
-      .catch(() => undefined);
-
-    return () => {
-      mounted = false;
-      unsubscribe?.();
-      void window.noitaUtil.noitaProcess.stopMemoryMonitor();
-    };
-  }, []);
+    return window.noitaUtil.noitaProcess.onMemoryStatus((status) => {
+      queryClient.setQueryData(memoryStatusQueryKey, status);
+    });
+  }, [queryClient]);
 
   return (
     <TooltipProvider>
@@ -80,7 +71,7 @@ const RootLayout = () => {
 
         <Separator />
         <footer className="flex h-7 items-center px-4 text-xs text-muted-foreground">
-          {memoryStatus?.message ?? 'looking for noita process...'}
+          {memoryStatusQuery.data?.message ?? lookingForNoitaStatus.message}
         </footer>
       </div>
       <Toaster />

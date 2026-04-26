@@ -2,6 +2,10 @@ import { app, BrowserWindow } from 'electron';
 import { electronApp, optimizer } from '@electron-toolkit/utils';
 import { registerIpcHandlers } from './app/ipc.js';
 import { createWindow } from './app/window.js';
+import {
+  startMemoryMonitor,
+  stopMemoryMonitor,
+} from './domains/noita-process/noita-process-service.js';
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -18,6 +22,7 @@ app.whenReady().then(() => {
   });
 
   registerIpcHandlers();
+  void startMemoryMonitor();
 
   createWindow();
 
@@ -35,4 +40,8 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
+});
+
+app.on('before-quit', () => {
+  void stopMemoryMonitor();
 });

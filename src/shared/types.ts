@@ -140,8 +140,6 @@ export type NoitaUtilApi = {
   noitaProcess: {
     runSeed: (seed: number) => Promise<void>;
     getMemoryStatus: () => Promise<MemoryStatus>;
-    startMemoryMonitor: () => Promise<void>;
-    stopMemoryMonitor: () => Promise<void>;
     onMemoryStatus: (callback: (status: MemoryStatus) => void) => () => void;
   };
 };

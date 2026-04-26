@@ -5,8 +5,6 @@ import { loadNoitaData } from '../domains/noita-data/noita-data-service.js';
 import {
   getMemoryStatus,
   runSeed,
-  startMemoryMonitor,
-  stopMemoryMonitor,
 } from '../domains/noita-process/noita-process-service.js';
 import { decryptAllSalakieli } from '../domains/salakieli/salakieli-service.js';
 import {
@@ -35,6 +33,4 @@ export function registerIpcHandlers(): void {
 
   ipcMain.handle('noita-process:run-seed', (_event, seed: number) => runSeed(seed));
   ipcMain.handle('noita-process:get-memory-status', () => getMemoryStatus());
-  ipcMain.handle('noita-process:start-memory-monitor', () => startMemoryMonitor());
-  ipcMain.handle('noita-process:stop-memory-monitor', () => stopMemoryMonitor());
 }

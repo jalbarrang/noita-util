@@ -27,8 +27,6 @@ const noitaUtil: NoitaUtilApi = {
   noitaProcess: {
     runSeed: (seed) => ipcRenderer.invoke('noita-process:run-seed', seed),
     getMemoryStatus: () => ipcRenderer.invoke('noita-process:get-memory-status'),
-    startMemoryMonitor: () => ipcRenderer.invoke('noita-process:start-memory-monitor'),
-    stopMemoryMonitor: () => ipcRenderer.invoke('noita-process:stop-memory-monitor'),
     onMemoryStatus: (callback) => {
       const listener = (_event: Electron.IpcRendererEvent, status: MemoryStatus) =>
         callback(status);
