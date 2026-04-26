@@ -32,4 +32,4 @@ Repository: https://github.com/jalbarrang/noita-util
 
 ## Task Management
 
-Use `/dex` to break down complex work, track progress across sessions, and coordinate multi-step implementations.
+Use `dex` cli to break down complex work, track progress across sessions, and coordinate multi-step implementations.
