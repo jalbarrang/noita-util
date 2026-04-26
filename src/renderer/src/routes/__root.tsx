@@ -6,11 +6,11 @@ import { Separator } from '@renderer/components/ui/separator';
 import { TooltipProvider } from '@renderer/components/ui/tooltip';
 import type { MemoryStatus } from '../../../shared/types';
 
-const tabs = [
+const tabs: Array<{ to: string; label: string; disabled?: boolean }> = [
   { to: '/', label: 'saves' },
   { to: '/salakieli', label: 'salakieli' },
-  { to: '/quickref', label: 'quickref', disabled: true },
-  { to: '/bone-wands', label: 'bone wands', disabled: true },
+  { to: '/quickref', label: 'quickref' },
+  { to: '/bone-wands', label: 'bone wands' },
 ];
 
 const memoryStatusQueryKey = ['noitaProcess', 'memoryStatus'];

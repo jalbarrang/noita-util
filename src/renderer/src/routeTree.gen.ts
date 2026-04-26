@@ -10,11 +10,23 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SalakieliRouteImport } from './routes/salakieli'
+import { Route as QuickrefRouteImport } from './routes/quickref'
+import { Route as BoneWandsRouteImport } from './routes/bone-wands'
 import { Route as IndexRouteImport } from './routes/index'
 
 const SalakieliRoute = SalakieliRouteImport.update({
   id: '/salakieli',
   path: '/salakieli',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuickrefRoute = QuickrefRouteImport.update({
+  id: '/quickref',
+  path: '/quickref',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoneWandsRoute = BoneWandsRouteImport.update({
+  id: '/bone-wands',
+  path: '/bone-wands',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -25,27 +37,35 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/bone-wands': typeof BoneWandsRoute
+  '/quickref': typeof QuickrefRoute
   '/salakieli': typeof SalakieliRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/bone-wands': typeof BoneWandsRoute
+  '/quickref': typeof QuickrefRoute
   '/salakieli': typeof SalakieliRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/bone-wands': typeof BoneWandsRoute
+  '/quickref': typeof QuickrefRoute
   '/salakieli': typeof SalakieliRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/salakieli'
+  fullPaths: '/' | '/bone-wands' | '/quickref' | '/salakieli'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/salakieli'
-  id: '__root__' | '/' | '/salakieli'
+  to: '/' | '/bone-wands' | '/quickref' | '/salakieli'
+  id: '__root__' | '/' | '/bone-wands' | '/quickref' | '/salakieli'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BoneWandsRoute: typeof BoneWandsRoute
+  QuickrefRoute: typeof QuickrefRoute
   SalakieliRoute: typeof SalakieliRoute
 }
 
@@ -56,6 +76,20 @@ declare module '@tanstack/react-router' {
       path: '/salakieli'
       fullPath: '/salakieli'
       preLoaderRoute: typeof SalakieliRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quickref': {
+      id: '/quickref'
+      path: '/quickref'
+      fullPath: '/quickref'
+      preLoaderRoute: typeof QuickrefRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bone-wands': {
+      id: '/bone-wands'
+      path: '/bone-wands'
+      fullPath: '/bone-wands'
+      preLoaderRoute: typeof BoneWandsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -70,6 +104,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BoneWandsRoute: BoneWandsRoute,
+  QuickrefRoute: QuickrefRoute,
   SalakieliRoute: SalakieliRoute,
 }
 export const routeTree = rootRouteImport

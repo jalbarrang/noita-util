@@ -7,7 +7,7 @@ import {
   RotateCcwIcon,
   Trash2Icon,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import {
@@ -44,6 +44,8 @@ export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
+const EMPTY_BACKUPS: BackupEntry[] = [];
+
 function HomePage() {
   const [selectedNames, setSelectedNames] = useState<Set<string>>(
     () => new Set()
@@ -61,7 +63,7 @@ function HomePage() {
     queryFn: () => window.noitaUtil.saves.listBackups(),
   });
 
-  const backups = backupsQuery.data ?? [];
+  const backups = backupsQuery.data ?? EMPTY_BACKUPS;
 
   const selectedBackups = useMemo(
     () => backups.filter((backup) => selectedNames.has(backup.name)),

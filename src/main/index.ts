@@ -1,11 +1,14 @@
 import { app, BrowserWindow } from 'electron';
 import { electronApp, optimizer } from '@electron-toolkit/utils';
+import { registerNoitaAssetProtocol, registerNoitaAssetScheme } from './app/asset-protocol.js';
 import { registerIpcHandlers } from './app/ipc.js';
 import { createWindow } from './app/window.js';
 import {
   startMemoryMonitor,
   stopMemoryMonitor,
 } from './domains/noita-process/noita-process-service.js';
+
+registerNoitaAssetScheme();
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -22,6 +25,7 @@ app.whenReady().then(() => {
   });
 
   registerIpcHandlers();
+  registerNoitaAssetProtocol();
   void startMemoryMonitor();
 
   createWindow();

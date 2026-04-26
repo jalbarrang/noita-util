@@ -40,14 +40,47 @@ const defaultSpell = (): Spell => ({
   is_dangerous_blast: false,
   action: [],
   sprite: '',
+  spriteUrl: '',
   sprite_unidentified: '',
+  spriteUnidentifiedUrl: '',
   related_projectiles: '',
   custom_xml_file: '',
   spawn_requires_flag: '',
   sound_loop_tag: '',
   related_extra_entities: '',
   uiImageFilename: '',
+  uiImageUrl: '',
 });
+
+function toNoitaAssetUrl(path: string): string {
+  const normalized = path.replace(/\\/g, '/').replace(/^\/+/, '');
+  if (!normalized) return '';
+  return `noita-asset:///${normalized.split('/').map(encodeURIComponent).join('/')}`;
+}
+
+function enrichSpellAssets(spell: Spell): Spell {
+  return {
+    ...spell,
+    spriteUrl: toNoitaAssetUrl(spell.sprite),
+    spriteUnidentifiedUrl: toNoitaAssetUrl(spell.sprite_unidentified),
+    uiImageUrl: toNoitaAssetUrl(spell.uiImageFilename),
+  };
+}
+
+function enrichPerkAssets(perk: Perk): Perk {
+  return {
+    ...perk,
+    uiIconUrl: toNoitaAssetUrl(perk.ui_icon),
+    perkIconUrl: toNoitaAssetUrl(perk.perk_icon),
+  };
+}
+
+function enrichWandAssets(wand: Wand): Wand {
+  return {
+    ...wand,
+    spriteFileUrl: toNoitaAssetUrl(wand.spriteFile),
+  };
+}
 
 function translationsFile(config: AppConfig): string {
   return join(dirname(config.noitaExeFile), 'data', 'translations', 'common.csv');
@@ -184,7 +217,7 @@ export async function loadSpells(
     return spell;
   });
 
-  return spells.sort((a, b) => a.english_name.localeCompare(b.english_name));
+  return spells.map(enrichSpellAssets).sort((a, b) => a.english_name.localeCompare(b.english_name));
 }
 
 export async function loadPerks(
@@ -201,7 +234,9 @@ export async function loadPerks(
     ui_name: '',
     ui_description: '',
     ui_icon: '',
+    uiIconUrl: '',
     perk_icon: '',
+    perkIconUrl: '',
     english_name: '',
     english_desc: '',
   };
@@ -211,13 +246,15 @@ export async function loadPerks(
     if (trimmed === '},') {
       current.english_name = translationMap[current.ui_name] ?? current.ui_name;
       current.english_desc = translationMap[current.ui_description] ?? current.ui_description;
-      perks.push(current);
+      perks.push(enrichPerkAssets(current));
       current = {
         id: '',
         ui_name: '',
         ui_description: '',
         ui_icon: '',
+        uiIconUrl: '',
         perk_icon: '',
+        perkIconUrl: '',
         english_name: '',
         english_desc: '',
       };
@@ -263,7 +300,7 @@ function loadSpellsForWand(
       if (!spellId || !imageFilename) throw new Error('Wand spell component missing');
       const spell = spells.get(spellId);
       if (!spell) throw new Error(`Spell ${spellId} not found`);
-      return { ...spell, uiImageFilename: imageFilename };
+      return enrichSpellAssets({ ...spell, uiImageFilename: imageFilename });
     });
 }
 
@@ -296,12 +333,13 @@ export async function loadBoneWand(file: string, spells: Map<string, Spell>): Pr
     alwaysCasts: loadSpellsForWand(parsedRoot, spells, '1'),
     spells: loadSpellsForWand(parsedRoot, spells, '0'),
     spriteFile: ability['@_sprite_file'] ?? entity['@_sprite_file'] ?? '',
+    spriteFileUrl: '',
   };
 
   return {
     fileName: file.split(/[\\/]/).at(-1) ?? file,
     lastModified: info.mtime.toISOString(),
-    wand,
+    wand: enrichWandAssets(wand),
   };
 }
 

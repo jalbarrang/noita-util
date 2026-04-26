@@ -64,13 +64,16 @@ export type Spell = {
   is_dangerous_blast: boolean;
   action: string[];
   sprite: string;
+  spriteUrl: string;
   sprite_unidentified: string;
+  spriteUnidentifiedUrl: string;
   related_projectiles: string;
   custom_xml_file: string;
   spawn_requires_flag: string;
   sound_loop_tag: string;
   related_extra_entities: string;
   uiImageFilename: string;
+  uiImageUrl: string;
 };
 
 export type Perk = {
@@ -78,7 +81,9 @@ export type Perk = {
   ui_name: string;
   ui_description: string;
   ui_icon: string;
+  uiIconUrl: string;
   perk_icon: string;
+  perkIconUrl: string;
   english_name: string;
   english_desc: string;
 };
@@ -95,6 +100,7 @@ export type Wand = {
   alwaysCasts: Spell[];
   spells: Spell[];
   spriteFile: string;
+  spriteFileUrl: string;
 };
 
 export type BoneWand = {
