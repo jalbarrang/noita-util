@@ -11,6 +11,7 @@ Repository: https://github.com/jalbarrang/noita-util
 
 - Prefer using `bun` for package management, avoid using `npm`/`yarn`/`pnpm`.
 - Prefer using the available `package.json` scripts instead of running commands directly for typechecking, linting, formatting, testing, etc.
+- Never use "bun run build" to check if the build passes, for that typechecking should be enough 
 
 ## Code Style
 

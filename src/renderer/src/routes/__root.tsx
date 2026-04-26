@@ -7,7 +7,7 @@ import type { MemoryStatus } from '../../../shared/types';
 
 const tabs = [
   { to: '/', label: 'saves' },
-  { to: '/salakieli', label: 'salakieli', disabled: true },
+  { to: '/salakieli', label: 'salakieli' },
   { to: '/quickref', label: 'quickref', disabled: true },
   { to: '/bone-wands', label: 'bone wands', disabled: true },
 ];
