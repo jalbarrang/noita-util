@@ -1,0 +1,30 @@
+{
+  "platform": "windows64",
+  "jdk": "C:\\Users\\dkilm\\code\\OpenJDK17U-jre_x64_windows_hotspot_17.0.2_8.zip",
+  "executable": "noita-util",
+  "classpath": [
+    "noita-util-1.1.0.jar",
+    "annotations-13.0.jar",
+    "commons-csv-1.9.0.jar",
+    "jackson-annotations-2.13.2.jar",
+    "jackson-core-2.13.2.jar",
+    "jackson-databind-2.13.2.jar",
+    "jackson-datatype-jsr310-2.13.2.jar",
+    "jackson-module-kotlin-2.13.2.jar",
+    "jna-5.10.0.jar",
+    "jna-platform-5.10.0.jar",
+    "jsoup-1.14.3.jar",
+    "kotlin-reflect-1.5.30.jar",
+    "kotlin-stdlib-1.6.20.jar",
+    "kotlin-stdlib-common-1.6.20.jar",
+    "kotlin-stdlib-jdk7-1.6.20.jar",
+    "kotlin-stdlib-jdk8-1.6.20.jar",
+    "oshi-core-6.1.5.jar",
+    "slf4j-api-1.7.36.jar",
+    "slf4j-simple-1.7.36.jar"
+  ],
+  "mainclass": "com.dimdarkevil.noitautil.KotlinMain",
+  "vmargs": ["Xmx512M"],
+  "resources": ["C:\\Users\\dkilm\\code\\noita-util\\src\\main\\resources"],
+  "output": "noita-util"
+}
