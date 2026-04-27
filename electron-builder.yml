@@ -17,17 +17,23 @@ asarUnpack:
 
 win:
   executableName: noita-util
+  target:
+    - nsis
+    - portable
+
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
 
-appImage:
-  artifactName: ${name}-${version}.${ext}
+portable:
+  artifactName: ${name}-${version}-portable.${ext}
 
 npmRebuild: false
 
 publish:
   provider: github
-  url: https://github.com/jalbarrang/noita-util/releases
+  owner: jalbarrang
+  repo: noita-util
+  releaseType: release
