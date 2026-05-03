@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
   ArchiveIcon,
   FileClockIcon,
+  Loader2Icon,
   PlayIcon,
   RefreshCwIcon,
   RotateCcwIcon,
@@ -25,6 +26,7 @@ import { Button } from "@renderer/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -46,12 +48,13 @@ export const Route = createFileRoute("/")({
 });
 
 const EMPTY_BACKUPS: BackupEntry[] = [];
+type BusyAction = "create" | "restore" | "delete";
 
 function HomePage() {
   const [selectedNames, setSelectedNames] = useState<Set<string>>(
     () => new Set()
   );
-  const [busy, setBusy] = useState(false);
+  const [busyAction, setBusyAction] = useState<BusyAction | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [restoreOpen, setRestoreOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -86,6 +89,8 @@ function HomePage() {
   });
 
   const backups = backupsQuery.data ?? EMPTY_BACKUPS;
+  const busy = busyAction !== null;
+  const isCreatingBackup = busyAction === "create";
 
   const selectedBackups = useMemo(
     () => backups.filter((backup) => selectedNames.has(backup.name)),
@@ -142,7 +147,9 @@ function HomePage() {
   };
 
   const createBackup = async () => {
-    setBusy(true);
+    if (busy) return;
+
+    setBusyAction("create");
     try {
       const backup = await window.noitaUtil.saves.createBackup(
         backupName.trim() || undefined
@@ -155,7 +162,7 @@ function HomePage() {
         description: getErrorMessage(error),
       });
     } finally {
-      setBusy(false);
+      setBusyAction(null);
     }
   };
 
@@ -163,7 +170,7 @@ function HomePage() {
     const [backup] = selectedBackups;
     if (!backup) return;
 
-    setBusy(true);
+    setBusyAction("restore");
     try {
       await window.noitaUtil.saves.restoreBackup(backup.name, backupFirst);
       toast.success("Backup restored", { description: backup.name });
@@ -174,7 +181,7 @@ function HomePage() {
         description: getErrorMessage(error),
       });
     } finally {
-      setBusy(false);
+      setBusyAction(null);
     }
   };
 
@@ -182,7 +189,7 @@ function HomePage() {
     const names = selectedBackups.map((backup) => backup.name);
     if (names.length === 0) return;
 
-    setBusy(true);
+    setBusyAction("delete");
     try {
       await window.noitaUtil.saves.deleteBackups(names);
       toast.success("Backups deleted", {
@@ -196,7 +203,7 @@ function HomePage() {
         description: getErrorMessage(error),
       });
     } finally {
-      setBusy(false);
+      setBusyAction(null);
     }
   };
 
@@ -341,21 +348,38 @@ function HomePage() {
         </Table>
       </div>
 
-      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent>
+      <Dialog
+        open={createOpen}
+        onOpenChange={(open) => {
+          if (!isCreatingBackup) setCreateOpen(open);
+        }}
+      >
+        <DialogContent showCloseButton={!isCreatingBackup} aria-busy={isCreatingBackup}>
           <DialogHeader>
             <DialogTitle>Create Backup</DialogTitle>
+            <DialogDescription>
+              {isCreatingBackup
+                ? "Creating the backup. You can keep using the app while the zip is written."
+                : "Choose a name for the save backup zip."}
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-2">
             <Label htmlFor="backup-name">name</Label>
             <Input
               id="backup-name"
               value={backupName}
+              disabled={isCreatingBackup}
               onChange={(event) => setBackupName(event.target.value)}
               onKeyDown={(event) => {
-                if (event.key === "Enter") void createBackup();
+                if (event.key === "Enter" && !isCreatingBackup) void createBackup();
               }}
             />
+            {isCreatingBackup && (
+              <div className="flex items-center gap-2 text-muted-foreground" role="status">
+                <Loader2Icon className="size-3 animate-spin" />
+                Writing backup archive...
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button
@@ -366,7 +390,8 @@ function HomePage() {
               cancel
             </Button>
             <Button onClick={() => void createBackup()} disabled={busy}>
-              create
+              {isCreatingBackup && <Loader2Icon className="animate-spin" />}
+              {isCreatingBackup ? "creating..." : "create"}
             </Button>
           </DialogFooter>
         </DialogContent>

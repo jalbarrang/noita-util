@@ -1,6 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import type { AppConfig } from "../../../shared/types";
 
 import { Button } from "@renderer/components/ui/button";
 import {
@@ -16,13 +17,51 @@ export const Route = createFileRoute("/salakieli")({
 });
 
 const EMPTY_FILES: Record<string, string> = {};
+const LEFT_PANEL_MIN = 200;
+const LEFT_PANEL_MAX = 250;
 
 function SalakieliPage() {
+  const queryClient = useQueryClient();
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const configQuery = useQuery({
+    queryKey: ["config"],
+    queryFn: () => window.noitaUtil.config.load(),
+  });
   const salakieliQuery = useQuery({
     queryKey: ["salakieli", "decryptAll"],
     queryFn: () => window.noitaUtil.salakieli.decryptAll(),
   });
+
+  const persistedSize = configQuery.data?.salakieliSplitterPosition ?? -1;
+  const defaultSize =
+    persistedSize > 0
+      ? Math.min(Math.max(persistedSize, LEFT_PANEL_MIN), LEFT_PANEL_MAX)
+      : LEFT_PANEL_MIN;
+
+  const configRef = useRef<AppConfig | undefined>(undefined);
+  configRef.current = configQuery.data;
+
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const handleResize = (size: unknown) => {
+    const num = Number(size);
+    if (Number.isNaN(num)) return;
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    saveTimeoutRef.current = setTimeout(() => {
+      const current = configRef.current;
+      if (!current) return;
+      const clamped = Math.min(
+        Math.max(Math.round(num), LEFT_PANEL_MIN),
+        LEFT_PANEL_MAX,
+      );
+      const updated: AppConfig = {
+        ...current,
+        salakieliSplitterPosition: clamped,
+      };
+      window.noitaUtil.config.save(updated).then((saved) => {
+        queryClient.setQueryData(["config"], saved);
+      });
+    }, 300);
+  };
 
   const files = salakieliQuery.data ?? EMPTY_FILES;
   const fileNames = useMemo(() => Object.keys(files).sort(), [files]);
@@ -35,7 +74,12 @@ function SalakieliPage() {
   return (
     <div className="h-full">
       <ResizablePanelGroup orientation="horizontal">
-        <ResizablePanel defaultSize={200} minSize={200} maxSize={250}>
+        <ResizablePanel
+          defaultSize={defaultSize}
+          minSize={LEFT_PANEL_MIN}
+          maxSize={LEFT_PANEL_MAX}
+          onResize={handleResize}
+        >
           <aside className="flex h-full flex-col border-r">
             <div className="flex h-12 items-center border-b px-4 text-xs font-medium">
               salakieli

@@ -52,7 +52,7 @@ const RootLayout = () => {
   const showSetupGate = setupRequired && pathname !== "/settings";
   const checkingPaths =
     pathname !== "/settings" &&
-    (configQuery.isLoading || (Boolean(configQuery.data) && validationQuery.isLoading));
+    (configQuery.isPending || (Boolean(configQuery.data) && validationQuery.isPending));
 
   useEffect(() => {
     return window.noitaUtil.noitaProcess.onMemoryStatus((status) => {

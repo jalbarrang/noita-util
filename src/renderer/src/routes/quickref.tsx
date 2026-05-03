@@ -1,6 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useDeferredValue, useMemo, useState } from "react";
+import { useDeferredValue, useMemo, useRef, useState } from "react";
+import type { AppConfig } from "../../../shared/types";
 
 import { Input } from "@renderer/components/ui/input";
 import {
@@ -17,6 +18,8 @@ export const Route = createFileRoute("/quickref")({
 });
 
 const EMPTY_SPELLS: Spell[] = [];
+const LEFT_PANEL_MIN = 300;
+const LEFT_PANEL_MAX = 500;
 
 const detailFields: Array<{
   label: string;
@@ -82,13 +85,51 @@ const detailFields: Array<{
 ];
 
 function QuickrefPage() {
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search);
   const [selectedSpellId, setSelectedSpellId] = useState<string | null>(null);
+
+  const configQuery = useQuery({
+    queryKey: ["config"],
+    queryFn: () => window.noitaUtil.config.load(),
+  });
+
   const noitaDataQuery = useQuery({
     queryKey: ["noitaData", "load"],
     queryFn: () => window.noitaUtil.noitaData.load(),
   });
+
+  const persistedSize = configQuery.data?.qrefSplitterPosition ?? -1;
+  const defaultSize =
+    persistedSize > 0
+      ? Math.min(Math.max(persistedSize, LEFT_PANEL_MIN), LEFT_PANEL_MAX)
+      : LEFT_PANEL_MIN;
+
+  const configRef = useRef<AppConfig | undefined>(undefined);
+  configRef.current = configQuery.data;
+
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const handleResize = (size: unknown) => {
+    const num = Number(size);
+    if (Number.isNaN(num)) return;
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    saveTimeoutRef.current = setTimeout(() => {
+      const current = configRef.current;
+      if (!current) return;
+      const clamped = Math.min(
+        Math.max(Math.round(num), LEFT_PANEL_MIN),
+        LEFT_PANEL_MAX,
+      );
+      const updated: AppConfig = {
+        ...current,
+        qrefSplitterPosition: clamped,
+      };
+      window.noitaUtil.config.save(updated).then((saved) => {
+        queryClient.setQueryData(["config"], saved);
+      });
+    }, 300);
+  };
 
   const spells = noitaDataQuery.data?.spells ?? EMPTY_SPELLS;
   const filteredSpells = useMemo(
@@ -112,7 +153,12 @@ function QuickrefPage() {
   return (
     <div className="h-full">
       <ResizablePanelGroup orientation="horizontal">
-        <ResizablePanel defaultSize={300} minSize={300} maxSize={500}>
+        <ResizablePanel
+          defaultSize={defaultSize}
+          minSize={LEFT_PANEL_MIN}
+          maxSize={LEFT_PANEL_MAX}
+          onResize={handleResize}
+        >
           <section className="flex h-full flex-col border-r">
             <div className="flex h-12 items-center gap-3 border-b px-4">
               <div className="text-xs font-medium">quickref</div>
