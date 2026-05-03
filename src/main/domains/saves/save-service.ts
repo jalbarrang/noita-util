@@ -1,6 +1,9 @@
-import AdmZip from "adm-zip";
+import { createWriteStream } from "node:fs";
 import { mkdir, readdir, rename, rm, stat } from "node:fs/promises";
-import { basename, join, resolve, sep } from "node:path";
+import { basename, dirname, join, relative, resolve, sep } from "node:path";
+import { pipeline } from "node:stream/promises";
+import yauzl from "yauzl";
+import yazl from "yazl";
 import type { BackupEntry } from "../../../shared/types.js";
 import { loadConfig } from "../config/config-service.js";
 import { logAction } from "../activity-log/activity-log-service.js";
@@ -34,6 +37,36 @@ async function toBackupEntry(path: string): Promise<BackupEntry> {
     size: info.size,
     lastModified: info.mtime.toISOString(),
   };
+}
+
+export async function zipFolder(
+  sourceDir: string,
+  zipPrefix: string,
+  outputPath: string,
+): Promise<void> {
+  const entries = await readdir(sourceDir, {
+    withFileTypes: true,
+    recursive: true,
+  });
+  const zipfile = new yazl.ZipFile();
+  for (const entry of entries) {
+    if (!entry.isFile()) continue;
+    const realPath = join(entry.parentPath, entry.name);
+    const relPath = relative(sourceDir, realPath).replaceAll("\\", "/");
+    const metadataPath = `${zipPrefix}/${relPath}`;
+    zipfile.addFile(realPath, metadataPath);
+  }
+  zipfile.end();
+  await pipeline(zipfile.outputStream, createWriteStream(outputPath));
+}
+
+function openZip(zipPath: string): Promise<yauzl.ZipFile> {
+  return new Promise((resolve, reject) => {
+    yauzl.open(zipPath, { lazyEntries: true }, (err, zipfile) => {
+      if (err) reject(err);
+      else resolve(zipfile!);
+    });
+  });
 }
 
 export async function listBackups(): Promise<BackupEntry[]> {
@@ -73,9 +106,7 @@ export async function createBackup(
 
   await mkdir(config.noitaBackupFolder, { recursive: true });
   const output = join(config.noitaBackupFolder, safeBackupName(name));
-  const zip = new AdmZip();
-  zip.addLocalFolder(saveFolder, "save00");
-  zip.writeZip(output);
+  await zipFolder(saveFolder, "save00", output);
 
   await logAction("BACKUP", basename(output));
   return toBackupEntry(output);
@@ -93,15 +124,51 @@ export function assertZipEntryInsideDestination(
   return destPath;
 }
 
-async function extractZipSafely(
+export async function extractZipSafely(
   zipFile: string,
   destFolder: string,
 ): Promise<void> {
-  const zip = new AdmZip(zipFile);
-  for (const entry of zip.getEntries()) {
-    assertZipEntryInsideDestination(destFolder, entry.entryName);
+  const zipHandle = await openZip(zipFile);
+  try {
+    await new Promise<void>((resolve, reject) => {
+      zipHandle.on("error", reject);
+      zipHandle.on("end", resolve);
+      zipHandle.on("entry", (entry: yauzl.Entry) => {
+        try {
+          const destPath = assertZipEntryInsideDestination(
+            destFolder,
+            entry.fileName,
+          );
+
+          if (entry.fileName.endsWith("/")) {
+            mkdir(destPath, { recursive: true }).then(
+              () => zipHandle.readEntry(),
+              reject,
+            );
+            return;
+          }
+
+          mkdir(dirname(destPath), { recursive: true }).then(() => {
+            zipHandle.openReadStream(entry, (err, readStream) => {
+              if (err) {
+                reject(err);
+                return;
+              }
+              pipeline(readStream!, createWriteStream(destPath)).then(
+                () => zipHandle.readEntry(),
+                reject,
+              );
+            });
+          }, reject);
+        } catch (err) {
+          reject(err);
+        }
+      });
+      zipHandle.readEntry();
+    });
+  } finally {
+    zipHandle.close();
   }
-  zip.extractAllTo(destFolder, true);
 }
 
 export async function restoreBackup(
